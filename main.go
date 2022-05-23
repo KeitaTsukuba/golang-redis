@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"golang-redis/repository"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
@@ -15,5 +16,21 @@ func main() {
 		return c.SendString("Hello, World 👋!")
 	})
 
+	app.Get("users/:uuid", getUserList)
+
 	app.Listen(":8080")
+}
+
+func getUserList(c *fiber.Ctx) error {
+	// リクエストからIDを取得
+	uuid := c.Params("uuid")
+
+	// redisからデータを取得
+	userList, err := repository.GetUserList(uuid)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return c.JSON(userList)
 }
