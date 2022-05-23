@@ -2,6 +2,7 @@ package main
 
 import (
 	"golang-redis/repository"
+	"golang-redis/sort"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,6 +18,7 @@ func main() {
 	})
 
 	app.Get("users/:uuid", getUserList)
+	app.Get("ranking", ranking)
 
 	app.Listen(":8080")
 }
@@ -24,13 +26,25 @@ func main() {
 func getUserList(c *fiber.Ctx) error {
 	// リクエストからIDを取得
 	uuid := c.Params("uuid")
-
+ 
 	// redisからデータを取得
 	userList, err := repository.GetUserList(uuid)
-
 	if err != nil {
 		panic(err)
 	}
-
+ 
+	// 降順にする
+	userList = sort.RankingSort(userList)
+ 
 	return c.JSON(userList)
+}
+
+func ranking(ctx *fiber.Ctx) error {
+	result, err := repository.GetRankings()
+ 
+	if err != nil {
+		panic(err)
+	}
+ 
+	return ctx.JSON(result)
 }

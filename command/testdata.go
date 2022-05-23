@@ -69,6 +69,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	
+	// Sort
+	for _, user := range userList {
+		r.ZAdd(c, "rankings", &redis.Z{
+			Score:  float64(user.AccountID),
+			Member: user.Name,
+		})
+	}
 
 	log.Println("complete")
 }

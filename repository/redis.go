@@ -32,3 +32,27 @@ func GetUserList(uuid string) ([]models.User, error) {
 	}
 	return *userList, nil
 }
+
+func GetRankings() (map[string]float64, error) {
+	// zrevrangebyscore
+	//http://mogile.web.fc2.com/redis/commands/zrevrangebyscore.html
+	rankings, err := Cache.ZRevRangeByScoreWithScores(
+		context.Background(),
+		"rankings", // updateRankings.goでkeyとして設定した値
+		&redis.ZRangeBy{
+			Min: "-inf",
+			Max: "+inf",
+		}).Result()
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]float64)
+
+	for _, ranking := range rankings {
+		result[ranking.Member.(string)] = ranking.Score
+	}
+
+	return result, nil
+}
